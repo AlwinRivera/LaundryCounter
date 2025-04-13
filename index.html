@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Laundry Token</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f2f8f7;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .laundry-type {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding: 10px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .type-input,
+    .qty-input {
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    .type-input {
+      flex: 1;
+      min-width: 100px;
+    }
+
+    .qty-input {
+      width: 60px;
+      text-align: center;
+    }
+
+    .plus-btn,
+    .minus-btn,
+    .remove-btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .plus-btn {
+      background: #d4f7d4;
+    }
+
+    .minus-btn {
+      background: #f7d4d4;
+    }
+
+    .remove-btn {
+      background: #eee;
+      margin-left: auto;
+      color: #333;
+    }
+
+    .add-btn {
+      display: block;
+      margin: 30px auto 10px;
+      padding: 12px 24px;
+      font-size: 16px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .add-btn:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Laundry Counter</h1>
+
+  <div id="laundry-container"></div>
+
+  <button class="add-btn" onclick="addLaundryType()">+ Add Laundry Type</button>
+
+  <script>
+    const container = document.getElementById("laundry-container");
+
+    function createLaundryType(type = "", qty = 0) {
+      const el = document.createElement("div");
+      el.className = "laundry-type";
+      el.innerHTML = `
+        <input type="text" placeholder="Laundry Type" class="type-input" value="${type}" />
+        <button class="minus-btn">-</button>
+        <input type="number" class="qty-input" value="${qty}" min="0" />
+        <button class="plus-btn">+</button>
+        <button class="remove-btn">Remove</button>
+      `;
+      container.appendChild(el);
+    }
+
+    function saveToLocalStorage() {
+      const items = [];
+      document.querySelectorAll(".laundry-type").forEach(el => {
+        const type = el.querySelector(".type-input").value;
+        const qty = parseInt(el.querySelector(".qty-input").value);
+        if (type) items.push({ type, qty });
+      });
+      localStorage.setItem("laundryItems", JSON.stringify(items));
+    }
+
+    function loadFromLocalStorage() {
+      const items = JSON.parse(localStorage.getItem("laundryItems")) || [];
+      items.forEach(item => createLaundryType(item.type, item.qty));
+    }
+
+    function addLaundryType() {
+      createLaundryType();
+      saveToLocalStorage();
+    }
+
+    document.addEventListener("click", function (e) {
+      const parent = e.target.closest(".laundry-type");
+
+      if (e.target.classList.contains("plus-btn")) {
+        const input = parent.querySelector(".qty-input");
+        input.value = parseInt(input.value || 0) + 1;
+        saveToLocalStorage();
+      }
+
+      if (e.target.classList.contains("minus-btn")) {
+        const input = parent.querySelector(".qty-input");
+        input.value = Math.max(0, parseInt(input.value || 0) - 1);
+        saveToLocalStorage();
+      }
+
+      if (e.target.classList.contains("remove-btn")) {
+        parent.remove();
+        saveToLocalStorage();
+      }
+    });
+
+    document.addEventListener("input", function (e) {
+      if (e.target.matches(".type-input, .qty-input")) {
+        saveToLocalStorage();
+      }
+    });
+
+    // Load on start
+    loadFromLocalStorage();
+  </script>
+</body>
+</html>
